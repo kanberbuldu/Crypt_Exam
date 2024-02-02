@@ -1,0 +1,24 @@
+message = input ("Enter your message, your secret is safe with me: ")
+numkey = input("What is your name? ")
+bank = "ABCÇDEFGĞHIİJKLMNOÖPQRSŞTUÜVWXYZ abcçdefgğhıijklmnoöpqrsştuüvwxyz,’?!.$*&0123456789^#%{}[]"
+key=len(numkey)
+
+encrypt = ""
+for i in message:
+    position = bank.find(i)
+    newposition = (position + key) % 89
+    encrypt += bank[newposition]
+print("Your encrypted message is: " +encrypt)
+##########################################################
+print("\n \n Are you ready for your message?")
+dec_dkey = input("What is your name: ")
+if dec_dkey == numkey:
+    dkey = len(dec_dkey)
+    decrypt = ""
+    for i in encrypt:
+        pos = bank.find(i)
+        newpos = (pos - dkey) % 89
+        decrypt += bank[newpos]
+    print(numkey+ " wishes to tell you... " +decrypt)
+else:
+    print(f"Mesajınız:",encrypt)
