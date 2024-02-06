@@ -22,3 +22,96 @@ if dec_dkey == numkey:
     print(numkey+ " wishes to tell you... " +decrypt)
 else:
     print(f"Mesajınız:",encrypt)
+
+
+import tkinter.messagebox
+from tkinter import *
+from PIL  import ImageTk, Image
+from cryptography.fernet import Fernet
+
+window = Tk()
+window.title("Secret Notes")
+window.minsize(height=600,width=300)
+lbl_font= "Arial",10,"bold"
+
+
+
+
+
+
+
+
+
+
+#png resmi gösterme
+canvas = Canvas(width=300,height=300)
+canvas.place(x=75,y=0)
+img = (Image.open("secret2.png"))
+resized_image = img.resize((120,110))
+new_image = ImageTk.PhotoImage(resized_image)
+canvas.create_image(10,10,anchor=NW,image=new_image)
+
+
+
+enter_title =Label(text="Enter Your Title",font=lbl_font)
+enter_title.place(x=90,y=200)
+
+title_entry = Entry(width=25,font=lbl_font)
+title_entry.place(x=65,y=230)
+
+enter_secret =Label(text="Enter Your Secret",font=lbl_font)
+enter_secret.place(x=85,y=250)
+
+enter_listbox = Entry(font=lbl_font)
+enter_listbox.place(x=40,y=280)
+
+enter_master_key =Label(text="Enter Master key",font=lbl_font)
+enter_master_key.place(x=90,y=450)
+
+enter_Master_entry = Entry(width=25,font=lbl_font)
+enter_Master_entry.place(x=65,y=480)
+
+def encrypt_message():
+    password = enter_Master_entry.get()
+    key = Fernet.generate_key()
+    f = Fernet(key)
+
+
+    message = enter_listbox.get()
+
+    message_conv = message.encode()
+    pass_conv = password.encode()
+    token = f.encrypt(message_conv)
+    token2 = f.encrypt(pass_conv)
+    print(token.decode() + token2.decode())
+
+    token
+    b'....'
+
+
+    user_password = enter_Master_entry.get()
+
+    dec_message=f.decrypt(token).decode("utf-8")
+    enter_listbox.config(text=dec_message)
+
+
+def write_title():
+
+
+    if title_entry.get() != "" or enter_Master_entry.get() !="":
+        with open("mysecretnote.txt", "a") as my_file:
+            my_file.write(encrypt_message())
+        tkinter.messagebox.showinfo(title="Save Title",message="Your File Saved")
+    else:
+        tkinter.messagebox.showinfo(title="Save Title", message="Pls Enter All İnformation")
+
+
+save_button = Button(text="Save & Encrypt",font=lbl_font,command=write_title)
+save_button.place(x =90,y=510)
+
+
+decrypt_button = Button(text="Decrypt",font=lbl_font)
+decrypt_button.place(x =115,y=540)
+
+
+mainloop()
