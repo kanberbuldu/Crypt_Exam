@@ -1,48 +1,12 @@
-message = input ("Enter your message, your secret is safe with me: ")
-numkey = input("What is your name? ")
-bank = "ABCÇDEFGĞHIİJKLMNOÖPQRSŞTUÜVWXYZ abcçdefgğhıijklmnoöpqrsştuüvwxyz,’?!.$*&0123456789^#%{}[]"
-key=len(numkey)
-
-encrypt = ""
-for i in message:
-    position = bank.find(i)
-    newposition = (position + key) % 89
-    encrypt += bank[newposition]
-print("Your encrypted message is: " +encrypt)
-##########################################################
-print("\n \n Are you ready for your message?")
-dec_dkey = input("What is your name: ")
-if dec_dkey == numkey:
-    dkey = len(dec_dkey)
-    decrypt = ""
-    for i in encrypt:
-        pos = bank.find(i)
-        newpos = (pos - dkey) % 89
-        decrypt += bank[newpos]
-    print(numkey+ " wishes to tell you... " +decrypt)
-else:
-    print(f"Mesajınız:",encrypt)
-
-
-import tkinter.messagebox
 from tkinter import *
 from PIL  import ImageTk, Image
-from cryptography.fernet import Fernet
+import base64
+from tkinter import messagebox
 
 window = Tk()
 window.title("Secret Notes")
 window.minsize(height=600,width=300)
 lbl_font= "Arial",10,"bold"
-
-
-
-
-
-
-
-
-
-
 #png resmi gösterme
 canvas = Canvas(width=300,height=300)
 canvas.place(x=75,y=0)
@@ -53,64 +17,102 @@ canvas.create_image(10,10,anchor=NW,image=new_image)
 
 
 
-enter_title =Label(text="Enter Your Title",font=lbl_font)
-enter_title.place(x=90,y=200)
+
+
+
+def encode(key, clear):
+
+    enc = []
+    for i in range(len(clear)):
+        key_c = key[i % len(key)]
+        enc_c = chr((ord(clear[i]) + ord(key_c)) % 65536)
+        enc.append(enc_c)
+    return base64.urlsafe_b64encode("".join(enc).encode("utf-8")).decode("utf-8")
+
+
+
+def write_encryted_file():
+    title_input = title_entry.get()
+    listbox_input = enter_listbox.get("1.0", END)
+    masterkey_input_get = enter_Master_entry.get()
+
+    if len(title_input) == 0 or len(listbox_input) ==0 or len(masterkey_input_get) == 0:
+        messagebox.showinfo(title="Error !",message="Please Enter All info")
+
+    else:
+
+        try:
+            encrypted_text = encode(masterkey_input_get, listbox_input)
+            with open("mynote.txt", "a") as data_file:
+                data_file.write(f"\n{title_input}\n{encrypted_text}")
+
+                messagebox.showinfo(title="info !",message="Your Secret Notes Saved")
+        except FileNotFoundError:
+            with open("mynote.txt", "w") as data_file:
+                data_file.write(f"\n{title_input}\n{encrypted_text}")
+
+                messagebox.showinfo(title="info !",message="Your Secret Notes Saved")
+        finally:
+
+            title_entry.delete(0,END)
+            enter_listbox.delete("1.0",END)
+            enter_Master_entry.delete(0,END)
+            title_entry.focus()
+
+#decrypt
+def decrypt():
+    def decode(key, enc):
+        dec = []
+        enc = base64.urlsafe_b64decode(enc).decode("utf-8")
+        for i in range(len(enc)):
+            key_c = key[i % len(key)]
+            dec_c = chr((65536 + ord(enc[i]) - ord(key_c)) % 65536)
+            dec.append(dec_c)
+        return "".join(dec)
+
+
+    encrypted_message = enter_listbox.get("1.0",END)
+    masterkey = enter_Master_entry.get()
+
+    if len(encrypted_message) == 0 or len(masterkey) ==0:
+        messagebox.showinfo(title="Error !",message="Please Enter All info")
+
+    else:
+        try:
+            decrypt_message = decode(masterkey,encrypted_message)
+            enter_listbox.delete("1.0",END)
+            enter_Master_entry.delete(0,END)
+            enter_listbox.insert("1.0",decrypt_message)
+
+        except:
+            messagebox.showinfo(title="Error !", message="Pls enter encrypted text")
+
+
+#ui
+
+
+enter_title_label =Label(text="Enter Your Title",font=lbl_font)
+enter_title_label.place(x=90,y=200)
 
 title_entry = Entry(width=25,font=lbl_font)
 title_entry.place(x=65,y=230)
 
-enter_secret =Label(text="Enter Your Secret",font=lbl_font)
-enter_secret.place(x=85,y=250)
+enter_secret_label =Label(text="Enter Your Secret",font=lbl_font)
+enter_secret_label.place(x=85,y=250)
 
-enter_listbox = Entry(font=lbl_font)
-enter_listbox.place(x=40,y=280)
+enter_listbox = Text(width=35,height=10,font=lbl_font)
+enter_listbox.place(x=30,y=280)
 
-enter_master_key =Label(text="Enter Master key",font=lbl_font)
-enter_master_key.place(x=90,y=450)
+enter_masterkey_label =Label(text="Enter Master key",font=lbl_font)
+enter_masterkey_label.place(x=90,y=450)
 
 enter_Master_entry = Entry(width=25,font=lbl_font)
 enter_Master_entry.place(x=65,y=480)
 
-def encrypt_message():
-    password = enter_Master_entry.get()
-    key = Fernet.generate_key()
-    f = Fernet(key)
-
-
-    message = enter_listbox.get()
-
-    message_conv = message.encode()
-    pass_conv = password.encode()
-    token = f.encrypt(message_conv)
-    token2 = f.encrypt(pass_conv)
-    print(token.decode() + token2.decode())
-
-    token
-    b'....'
-
-
-    user_password = enter_Master_entry.get()
-
-    dec_message=f.decrypt(token).decode("utf-8")
-    enter_listbox.config(text=dec_message)
-
-
-def write_title():
-
-
-    if title_entry.get() != "" or enter_Master_entry.get() !="":
-        with open("mysecretnote.txt", "a") as my_file:
-            my_file.write(encrypt_message())
-        tkinter.messagebox.showinfo(title="Save Title",message="Your File Saved")
-    else:
-        tkinter.messagebox.showinfo(title="Save Title", message="Pls Enter All İnformation")
-
-
-save_button = Button(text="Save & Encrypt",font=lbl_font,command=write_title)
+save_button = Button(text="Save & Encrypt",font=lbl_font,command=write_encryted_file)
 save_button.place(x =90,y=510)
 
-
-decrypt_button = Button(text="Decrypt",font=lbl_font)
+decrypt_button = Button(text="Decrypt",font=lbl_font,command=decrypt)
 decrypt_button.place(x =115,y=540)
 
 
